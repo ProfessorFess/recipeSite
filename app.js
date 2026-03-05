@@ -12,11 +12,20 @@ app.get('/', (req, res) => {
     res.render('index', { title: 'Home' });
 });
 
-// recipe listing page with db connection
+// recipe listing page with db connection, grouped by main protein
 app.get('/recipes', async (req, res) => {
     try {
-        const [rows] = await db.query('SELECT * FROM recipes');
-        res.render('recipes', { recipes: rows });
+        const [rows] = await db.query('SELECT * FROM recipes ORDER BY main_protein, title');
+
+        const recipesByProtein = rows.reduce((acc, recipe) => {
+            if (!acc[recipe.main_protein]) {
+                acc[recipe.main_protein] = [];
+            }
+            acc[recipe.main_protein].push(recipe);
+            return acc;
+        }, {});
+
+        res.render('recipes', { recipes: rows, recipesByProtein });
     } catch (err) {
         console.error(err);
         res.status(500).send('Database Error');

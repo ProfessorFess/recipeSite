@@ -7,34 +7,40 @@
 <body>
     <h1>Our Recipe Collection</h1>
 
-    <% if (recipes.length > 0) { %>
-        <table border="1">
-            <thead>
-                <tr>
-                    <th>Recipe Name</th>
-                    <th>Protein</th>
-                    <th>Details</th>
-                    <th>Delete</th>
-                </tr>
-            </thead>
-            <tbody>
-                <% recipes.forEach(recipe => { %>
+    <% const proteinKeys = Object.keys(recipesByProtein || {}); %>
+
+    <% if (proteinKeys.length > 0) { %>
+        <% proteinKeys.forEach(function(protein) { %>
+            <h2><%= protein %></h2>
+            <table border="1">
+                <thead>
                     <tr>
-                        <td><%= recipe.title %></td>
-                        <td><%= recipe.main_protein %></td>
-                        <td><a href="/recipe/<%= recipe.recipe_id %>">View Details</a></td>
-                        <td>
-                            <button 
-                                type="button" 
-                                class="delete-recipe-btn" 
-                                data-recipe-id="<%= recipe.recipe_id %>">
-                                Delete
-                            </button>
-                        </td>
+                        <th>Recipe Name</th>
+                        <th>Protein</th>
+                        <th>Details</th>
+                        <th>Delete</th>
                     </tr>
-                <% }); %>
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    <% recipesByProtein[protein].forEach(function(recipe) { %>
+                        <tr>
+                            <td><%= recipe.title %></td>
+                            <td><%= recipe.main_protein %></td>
+                            <td><a href="/recipe/<%= recipe.recipe_id %>">View Details</a></td>
+                            <td>
+                                <button 
+                                    type="button" 
+                                    class="delete-recipe-btn" 
+                                    data-recipe-id="<%= recipe.recipe_id %>">
+                                    Delete
+                                </button>
+                            </td>
+                        </tr>
+                    <% }); %>
+                </tbody>
+            </table>
+            <br>
+        <% }); %>
     <% } else { %>
         <p>No recipes found in the database. Did you run the SQL script?</p>
     <% } %>
