@@ -37,6 +37,46 @@ app.get('/recipe/:id', async (req, res) => {
     }
 });
 
+app.get('/add-recipe', (req, res) => {
+    res.render('add-recipe');
+});
+
+// POST method to add recipes to db
+app.post('/recipe/add', async (req, res) => {
+    try {
+        const {
+            title,
+            description,
+            instructions,
+            main_protein,
+            prep_time_mins,
+            featured_ingredient_id
+        } = req.body;
+
+        const sql = `
+            INSERT INTO recipes (title, description, instructions, main_protein, prep_time_mins, featured_ingredient_id)
+            VALUES (?, ?, ?, ?, ?, ?)
+        `;
+
+        const [result] = await db.query(sql, [
+            title,
+            description,
+            instructions,
+            main_protein,
+            prep_time_mins || null,
+            featured_ingredient_id || null
+        ]);
+
+        // after saving, redirect to recipe page
+        // get the last inserted recipe ID to redirect to its info page
+        const newRecipeId = result.insertId;
+        res.redirect(`/recipe/${newRecipeId}`);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Error saving recipe ');
+    }
+});
+
 // start the server here
 const PORT = 3000;
 app.listen(PORT, () => {

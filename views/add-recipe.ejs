@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Add Recipe</title>
+        <link rel="stylesheet" href="/css/style.css">
+    </head>
+    <body>
+        <h1>Add Recipe</h1>
+        <form action="/recipe/add" method="post">
+            <label for="title">Title</label>
+            <input id="title" name="title" type="text" required>
+
+            <label for="description">Description</label>
+            <textarea id="description" name="description"></textarea>
+
+            <label for="instructions">Instructions</label>
+            <textarea id="instructions" name="instructions"></textarea>
+
+            <label for="main_protein">Main Protein</label>
+            <select id="main_protein" name="main_protein" required>
+                <option value="Chicken">Chicken</option>
+                <option value="Beef">Beef</option>
+                <option value="Tofu">Tofu</option>
+                <option value="Grains">Grains</option>
+                <option value="Fish">Fish</option>
+            </select>
+
+            <label for="prep_time_mins">Prep Time (minutes)</label>
+            <input id="prep_time_mins" name="prep_time_mins" type="number" min="0">
+
+            <label for="featured_ingredient_id">Featured Ingredient ID</label>
+            <input id="featured_ingredient_id" name="featured_ingredient_id" type="number" min="1">
+
+            <button type="submit">Save Recipe</button>
+        </form>
+    </body>
+</html>
