@@ -59,6 +59,10 @@
 
             <fieldset>
                 <legend>Ingredients</legend>
+                <div class="search-row">
+                    <label for="ingredient-search">Search ingredients:</label>
+                    <input id="ingredient-search" type="text" placeholder="Type to filter by name">
+                </div>
                 <button type="button" id="open-ingredient-modal">Add new ingredient</button>
                 <ul class="ingredient-list" id="ingredient-list">
                 <% if (typeof ingredients !== 'undefined' && ingredients && ingredients.length) { %>
@@ -108,6 +112,7 @@
                 var closeBtn = document.getElementById('close-ingredient-modal');
                 var form = document.getElementById('new-ingredient-form');
                 var list = document.getElementById('ingredient-list');
+                var searchInput = document.getElementById('ingredient-search');
 
                 function openModal() {
                     overlay.classList.add('is-open');
@@ -124,6 +129,23 @@
                 overlay.addEventListener('click', function (e) {
                     if (e.target === overlay) closeModal();
                 });
+
+                if (searchInput) {
+                    searchInput.addEventListener('input', function () {
+                        var query = (this.value || '').toLowerCase();
+                        var items = list.querySelectorAll('li');
+                        items.forEach(function (li) {
+                            // skip the "no ingredients" message from filtering logic
+                            if (li.classList.contains('no-ingredients')) {
+                                li.style.display = query ? 'none' : '';
+                                return;
+                            }
+                            var label = li.textContent || '';
+                            var text = label.toLowerCase();
+                            li.style.display = !query || text.indexOf(query) !== -1 ? '' : 'none';
+                        });
+                    });
+                }
 
                 form.addEventListener('submit', function (e) {
                     e.preventDefault();
