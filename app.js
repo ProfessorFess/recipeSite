@@ -168,6 +168,107 @@ app.post('/recipe/add', async (req, res) => {
     }
 });
 
+app.get('/recipe/:id/edit', async (req, res) => {
+    try {
+        const recipeId = req.params.id;
+        const [recipeRows] = await db.query('SELECT * FROM recipes WHERE recipe_id = ?', [recipeId]);
+        if (recipeRows.length === 0) {
+            return res.status(404).send('Recipe not found');
+        }
+        const [allIngredients] = await db.query('SELECT * FROM ingredients ORDER BY name');
+        const [recipeIngredients] = await db.query(
+            'SELECT ingredient_id FROM recipe_ingredients WHERE recipe_id = ?',
+            [recipeId]
+        );
+        const selectedIds = recipeIngredients.map(r => r.ingredient_id);
+
+        res.render('edit-recipe', {
+            recipe: recipeRows[0],
+            ingredients: allIngredients,
+            selectedIngredientIds: selectedIds,
+            mainProteinOptions: MAIN_PROTEIN_OPTIONS,
+            errors: [],
+            formData: null
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Database Error');
+    }
+});
+
+app.post('/recipe/:id/edit', async (req, res) => {
+    try {
+        const recipeId = req.params.id;
+        const {
+            title,
+            description,
+            instructions,
+            main_protein,
+            prep_time_mins
+        } = req.body;
+
+        const trimmedTitle = title ? title.trim() : '';
+        const trimmedDescription = description ? description.trim() : '';
+        const trimmedInstructions = instructions ? instructions.trim() : '';
+        const trimmedMainProtein = main_protein ? main_protein.trim() : '';
+
+        let ingredientIds = req.body.ingredient_ids;
+        if (ingredientIds == null) ingredientIds = [];
+        if (!Array.isArray(ingredientIds)) ingredientIds = [ingredientIds];
+        const ids = ingredientIds
+            .filter(id => id !== '' && id != null)
+            .map(id => parseInt(id, 10))
+            .filter(n => !isNaN(n));
+
+        const errors = [];
+        if (!trimmedTitle) errors.push('Title is required.');
+        if (!trimmedInstructions) errors.push('Instructions are required.');
+        if (!trimmedMainProtein) {
+            errors.push('Main protein is required.');
+        } else if (!MAIN_PROTEIN_OPTIONS.includes(trimmedMainProtein)) {
+            errors.push('Please choose a valid main protein option.');
+        }
+        if (ids.length === 0) errors.push('Please select at least one ingredient.');
+
+        if (errors.length) {
+            const [allIngredients] = await db.query('SELECT * FROM ingredients ORDER BY name');
+            return res.status(400).render('edit-recipe', {
+                recipe: { recipe_id: recipeId },
+                ingredients: allIngredients,
+                selectedIngredientIds: ids,
+                mainProteinOptions: MAIN_PROTEIN_OPTIONS,
+                errors,
+                formData: {
+                    title: trimmedTitle,
+                    description: trimmedDescription,
+                    instructions: trimmedInstructions,
+                    main_protein: trimmedMainProtein,
+                    prep_time_mins,
+                    ingredient_ids: ids
+                }
+            });
+        }
+
+        await db.query(
+            `UPDATE recipes SET title = ?, description = ?, instructions = ?, main_protein = ?, prep_time_mins = ? WHERE recipe_id = ?`,
+            [trimmedTitle, trimmedDescription || null, trimmedInstructions, trimmedMainProtein, prep_time_mins || null, recipeId]
+        );
+
+        await db.query('DELETE FROM recipe_ingredients WHERE recipe_id = ?', [recipeId]);
+        for (let i = 0; i < ids.length; i++) {
+            await db.query(
+                'INSERT INTO recipe_ingredients (recipe_id, ingredient_id, quantity, unit, sort_order) VALUES (?, ?, NULL, NULL, ?)',
+                [recipeId, ids[i], i]
+            );
+        }
+
+        res.redirect(`/recipe/${recipeId}`);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Error updating recipe');
+    }
+});
+
 app.get('/ingredients', async (req, res) => {
     try {
         const [rows] = await db.query('SELECT * FROM ingredients ORDER BY name');

@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Edit Recipe</title>
+        <link rel="stylesheet" href="/css/style.css">
+    </head>
+    <body>
+        <nav class="top-nav">
+            <div class="top-nav-inner">
+                <a href="/" class="nav-brand">Recipe Site</a>
+                <a href="/recipes">Recipes</a>
+                <a href="/add-recipe">Add Recipe</a>
+                <a href="/ingredients">Ingredients</a>
+            </div>
+        </nav>
+
+        <div class="page">
+            <div class="page-inner">
+                <div class="card">
+                    <div class="card-header">
+                        <h1>Edit Recipe</h1>
+                    </div>
+
+                    <% if (errors && errors.length) { %>
+                        <div class="alert alert-error">
+                            <strong>Please fix the following:</strong>
+                            <ul>
+                                <% errors.forEach(function(err) { %>
+                                    <li><%= err %></li>
+                                <% }); %>
+                            </ul>
+                        </div>
+                    <% } %>
+
+                    <%
+                        var fd = formData || recipe;
+                        var checkedIds = formData ? (formData.ingredient_ids || []) : (selectedIngredientIds || []);
+                    %>
+
+                    <form action="/recipe/<%= recipe.recipe_id %>/edit" method="post" id="edit-recipe-form">
+                        <label for="title">Title</label>
+                        <input
+                            id="title"
+                            name="title"
+                            type="text"
+                            required
+                            value="<%= fd.title || '' %>">
+
+                        <label for="description">Description</label>
+                        <textarea id="description" name="description"><%= fd.description || '' %></textarea>
+
+                        <label for="instructions">Instructions</label>
+                        <textarea id="instructions" name="instructions" required><%= fd.instructions || '' %></textarea>
+
+                        <label for="main_protein">Main Protein</label>
+                        <select id="main_protein" name="main_protein" required>
+                            <option value="">-- Select main protein --</option>
+                            <% if (typeof mainProteinOptions !== 'undefined' && mainProteinOptions && mainProteinOptions.length) { %>
+                                <% mainProteinOptions.forEach(function(opt) { %>
+                                    <option
+                                        value="<%= opt %>"
+                                        <%= fd.main_protein === opt ? 'selected' : '' %>>
+                                        <%= opt %>
+                                    </option>
+                                <% }); %>
+                            <% } %>
+                        </select>
+
+                        <label for="prep_time_mins">Prep Time (minutes)</label>
+                        <input
+                            id="prep_time_mins"
+                            name="prep_time_mins"
+                            type="number"
+                            min="0"
+                            value="<%= fd.prep_time_mins != null ? fd.prep_time_mins : '' %>">
+
+                        <fieldset>
+                            <legend>Ingredients</legend>
+                            <div class="search-row">
+                                <label for="ingredient-search">Search ingredients:</label>
+                                <input id="ingredient-search" type="text" placeholder="Type to filter by name">
+                            </div>
+                            <button type="button" id="open-ingredient-modal" class="btn btn-ghost btn-sm">Add new ingredient</button>
+                            <ul class="ingredient-list" id="ingredient-list">
+                            <% if (typeof ingredients !== 'undefined' && ingredients && ingredients.length) { %>
+                                <% ingredients.forEach(function(ing) { %>
+                                    <li>
+                                        <label>
+                                            <input
+                                                type="checkbox"
+                                                name="ingredient_ids"
+                                                value="<%= ing.ingredient_id %>"
+                                                <%= checkedIds.indexOf(ing.ingredient_id) !== -1 ? 'checked' : '' %>>
+                                            <%= ing.name %>
+                                        </label>
+                                    </li>
+                                <% }); %>
+                            <% } else { %>
+                                <li class="no-ingredients">No ingredients in the database.</li>
+                            <% } %>
+                            </ul>
+                        </fieldset>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">Update Recipe</button>
+                            <a href="/recipe/<%= recipe.recipe_id %>" class="btn btn-ghost">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <footer class="site-footer">
+                Fess's Recipe Site &copy; 2026
+            </footer>
+        </div>
+
+        <div class="modal-overlay" id="ingredient-modal" aria-hidden="true">
+            <div class="modal-box" onclick="event.stopPropagation()">
+                <h2>Add new ingredient</h2>
+                <form id="new-ingredient-form">
+                    <label for="ing-name">Name</label>
+                    <input id="ing-name" name="name" type="text" required maxlength="100">
+
+                    <label for="ing-fact-title">Fact title (optional)</label>
+                    <input id="ing-fact-title" name="fact_title" type="text" maxlength="100">
+
+                    <label for="ing-fact-content">Fact content (optional)</label>
+                    <textarea id="ing-fact-content" name="fact_content" rows="3"></textarea>
+
+                    <div class="modal-actions">
+                        <button type="button" id="close-ingredient-modal" class="btn btn-cancel btn-sm">Cancel</button>
+                        <button type="submit" class="btn btn-primary btn-sm">Add ingredient</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <script>
+            (function () {
+                var recipeForm = document.getElementById('edit-recipe-form');
+                var overlay = document.getElementById('ingredient-modal');
+                var openBtn = document.getElementById('open-ingredient-modal');
+                var closeBtn = document.getElementById('close-ingredient-modal');
+                var form = document.getElementById('new-ingredient-form');
+                var list = document.getElementById('ingredient-list');
+                var searchInput = document.getElementById('ingredient-search');
+
+                function openModal() {
+                    overlay.classList.add('is-open');
+                    overlay.setAttribute('aria-hidden', 'false');
+                }
+                function closeModal() {
+                    overlay.classList.remove('is-open');
+                    overlay.setAttribute('aria-hidden', 'true');
+                    form.reset();
+                }
+
+                openBtn.addEventListener('click', openModal);
+                closeBtn.addEventListener('click', closeModal);
+                overlay.addEventListener('click', function (e) {
+                    if (e.target === overlay) closeModal();
+                });
+
+                if (searchInput) {
+                    searchInput.addEventListener('input', function () {
+                        var query = (this.value || '').toLowerCase();
+                        var items = list.querySelectorAll('li');
+                        items.forEach(function (li) {
+                            if (li.classList.contains('no-ingredients')) {
+                                li.style.display = query ? 'none' : '';
+                                return;
+                            }
+                            var label = li.textContent || '';
+                            var text = label.toLowerCase();
+                            li.style.display = !query || text.indexOf(query) !== -1 ? '' : 'none';
+                        });
+                    });
+                }
+
+                form.addEventListener('submit', function (e) {
+                    e.preventDefault();
+                    var fd = new FormData(form);
+                    var body = new URLSearchParams(fd);
+
+                    fetch('/ingredient/add', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: body
+                    })
+                    .then(function (res) {
+                        if (!res.ok) return res.text().then(function (t) { throw new Error(t || res.status); });
+                        return res.json();
+                    })
+                    .then(function (data) {
+                        var noMsg = list.querySelector('.no-ingredients');
+                        if (noMsg) noMsg.remove();
+
+                        var li = document.createElement('li');
+                        li.innerHTML = '<label><input type="checkbox" name="ingredient_ids" value="' + data.ingredient_id + '" checked> ' + escapeHtml(data.name) + '</label>';
+                        list.appendChild(li);
+
+                        closeModal();
+                    })
+                    .catch(function (err) {
+                        alert('Could not add ingredient: ' + (err.message || 'Unknown error'));
+                    });
+                });
+
+                function escapeHtml(text) {
+                    var div = document.createElement('div');
+                    div.textContent = text;
+                    return div.innerHTML;
+                }
+
+                if (recipeForm) {
+                    recipeForm.addEventListener('submit', function (e) {
+                        var messages = [];
+                        var titleInput = document.getElementById('title');
+                        var mainProteinSelect = document.getElementById('main_protein');
+                        var instructionsInput = document.getElementById('instructions');
+                        var ingredientCheckboxes = document.querySelectorAll('#ingredient-list input[type="checkbox"]:checked');
+
+                        if (!titleInput.value.trim()) {
+                            messages.push('Title is required.');
+                        }
+                        if (!mainProteinSelect.value) {
+                            messages.push('Main protein is required.');
+                        }
+                        if (!instructionsInput.value.trim()) {
+                            messages.push('Instructions are required.');
+                        }
+                        if (ingredientCheckboxes.length === 0) {
+                            messages.push('Please select at least one ingredient.');
+                        }
+
+                        if (messages.length) {
+                            e.preventDefault();
+                            alert(messages.join('\n'));
+                        }
+                    });
+                }
+            })();
+        </script>
+    </body>
+</html>
