@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>All Recipes</title>
+    <link rel="stylesheet" href="/css/style.css"> </head>
+<body>
+    <h1>Our Recipe Collection</h1>
+
+    <% if (recipes.length > 0) { %>
+        <table border="1">
+            <thead>
+                <tr>
+                    <th>Recipe Name</th>
+                    <th>Protein</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% recipes.forEach(recipe => { %>
+                    <tr>
+                        <td><%= recipe.title %></td>
+                        <td><%= recipe.main_protein %></td>
+                        <td><a href="/recipe/<%= recipe.recipe_id %>">View Details</a></td>
+                    </tr>
+                <% }); %>
+            </tbody>
+        </table>
+    <% } else { %>
+        <p>No recipes found in the database. Did you run the SQL script?</p>
+    <% } %>
+
+    <br>
+    <a href="/">Back to Home</a>
+</body>
+</html>

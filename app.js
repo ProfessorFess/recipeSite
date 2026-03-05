@@ -23,6 +23,20 @@ app.get('/recipes', async (req, res) => {
     }
 });
 
+app.get('/recipe/:id', async (req, res) => {
+    try {
+        const recipeId = req.params.id;
+        const [rows] = await db.query('SELECT * FROM recipes WHERE recipe_id = ?', [recipeId]);
+        if (rows.length === 0) {
+            return res.status(404).send('Recipe not found');
+        }
+        res.render('recipe', { recipe: rows[0] });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Database Error');
+    }
+});
+
 // start the server here
 const PORT = 3000;
 app.listen(PORT, () => {
