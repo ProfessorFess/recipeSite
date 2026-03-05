@@ -45,10 +45,22 @@ app.get('/recipe/:id', async (req, res) => {
     }
 });
 
+const MAIN_PROTEIN_OPTIONS = [
+    'Chicken', 'Beef', 'Pork', 'Turkey', 'Duck',
+    'Fish', 'Salmon', 'Tuna', 'Cod',
+    'Shrimp', 'Shellfish', 'Crab', 'Lobster',
+    'Eggs', 'Tofu', 'Tempeh', 'Seitan',
+    'Grains', 'Quinoa', 'Lentils', 'Beans', 'Chickpeas',
+    'Lamb', 'Venison', 'Sausage', 'Ham', 'Bacon', 'Salami',
+    'Plant-based Meat', 'Impossible Burger', 'Beyond Meat', 'Vegan Protein',
+    'Paneer', 'Cottage Cheese', 'Cheese', 'Yogurt',
+    'Goose', 'Rabbit', 'Other'
+];
+
 app.get('/add-recipe', async (req, res) => {
     try {
         const [rows] = await db.query('SELECT * FROM ingredients');
-        res.render('add-recipe', { ingredients: rows });
+        res.render('add-recipe', { ingredients: rows, mainProteinOptions: MAIN_PROTEIN_OPTIONS });
     } catch (err) {
         console.error(err);
         res.status(500).send('Database Error');

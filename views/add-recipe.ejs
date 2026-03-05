@@ -47,11 +47,11 @@
 
             <label for="main_protein">Main Protein</label>
             <select id="main_protein" name="main_protein" required>
-                <option value="Chicken">Chicken</option>
-                <option value="Beef">Beef</option>
-                <option value="Tofu">Tofu</option>
-                <option value="Grains">Grains</option>
-                <option value="Fish">Fish</option>
+                <% if (typeof mainProteinOptions !== 'undefined' && mainProteinOptions && mainProteinOptions.length) { %>
+                    <% mainProteinOptions.forEach(function(opt) { %>
+                        <option value="<%= opt %>"><%= opt %></option>
+                    <% }); %>
+                <% } %>
             </select>
 
             <label for="prep_time_mins">Prep Time (minutes)</label>
