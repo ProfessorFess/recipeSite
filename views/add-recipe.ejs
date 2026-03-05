@@ -4,6 +4,34 @@
         <meta charset="UTF-8">
         <title>Add Recipe</title>
         <link rel="stylesheet" href="/css/style.css">
+        <style>
+            .modal-overlay {
+                display: none;
+                position: fixed;
+                inset: 0;
+                background: rgba(0,0,0,0.5);
+                align-items: center;
+                justify-content: center;
+                z-index: 100;
+            }
+            .modal-overlay.is-open { display: flex; }
+            .modal-box {
+                background: #fff;
+                padding: 1.5rem;
+                border-radius: 8px;
+                box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+                min-width: 320px;
+            }
+            .modal-box h2 { margin-top: 0; }
+            .modal-box label { display: block; margin-top: 0.75rem; }
+            .modal-box input, .modal-box textarea { width: 100%; margin-top: 0.25rem; box-sizing: border-box; }
+            .modal-actions { margin-top: 1.25rem; display: flex; gap: 0.5rem; justify-content: flex-end; }
+            .modal-actions button[type="button"] { background: #888; color: #fff; border: none; padding: 0.4rem 0.8rem; border-radius: 4px; cursor: pointer; }
+            .modal-actions button[type="submit"] { cursor: pointer; }
+            .ingredient-list { list-style: none; padding-left: 0; margin: 0.5rem 0 0 0; }
+            .ingredient-list label { display: inline; margin-top: 0; }
+            .ingredient-list li { margin-bottom: 0.35rem; }
+        </style>
     </head>
     <body>
         <h1>Add Recipe</h1>
@@ -31,20 +59,107 @@
 
             <fieldset>
                 <legend>Ingredients</legend>
+                <button type="button" id="open-ingredient-modal">Add new ingredient</button>
+                <ul class="ingredient-list" id="ingredient-list">
                 <% if (typeof ingredients !== 'undefined' && ingredients && ingredients.length) { %>
                     <% ingredients.forEach(function(ing) { %>
-                        <label>
-                            <input type="checkbox" name="ingredient_ids" value="<%= ing.ingredient_id %>">
-                            <%= ing.name %>
-                        </label><br>
+                        <li>
+                            <label>
+                                <input type="checkbox" name="ingredient_ids" value="<%= ing.ingredient_id %>">
+                                <%= ing.name %>
+                            </label>
+                        </li>
                     <% }); %>
                 <% } else { %>
-                    <p>No ingredients in the database.</p>
+                    <li class="no-ingredients">No ingredients in the database.</li>
                 <% } %>
+                </ul>
             </fieldset>
 
             <button type="submit">Save Recipe</button>
         </form>
         <a href="/">Back to Home</a>
+
+        <div class="modal-overlay" id="ingredient-modal" aria-hidden="true">
+            <div class="modal-box" onclick="event.stopPropagation()">
+                <h2>Add new ingredient</h2>
+                <form id="new-ingredient-form">
+                    <label for="ing-name">Name</label>
+                    <input id="ing-name" name="name" type="text" required maxlength="100">
+
+                    <label for="ing-fact-title">Fact title (optional)</label>
+                    <input id="ing-fact-title" name="fact_title" type="text" maxlength="100">
+
+                    <label for="ing-fact-content">Fact content (optional)</label>
+                    <textarea id="ing-fact-content" name="fact_content" rows="3"></textarea>
+
+                    <div class="modal-actions">
+                        <button type="button" id="close-ingredient-modal">Cancel</button>
+                        <button type="submit">Add ingredient</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <script>
+            (function () {
+                var overlay = document.getElementById('ingredient-modal');
+                var openBtn = document.getElementById('open-ingredient-modal');
+                var closeBtn = document.getElementById('close-ingredient-modal');
+                var form = document.getElementById('new-ingredient-form');
+                var list = document.getElementById('ingredient-list');
+
+                function openModal() {
+                    overlay.classList.add('is-open');
+                    overlay.setAttribute('aria-hidden', 'false');
+                }
+                function closeModal() {
+                    overlay.classList.remove('is-open');
+                    overlay.setAttribute('aria-hidden', 'true');
+                    form.reset();
+                }
+
+                openBtn.addEventListener('click', openModal);
+                closeBtn.addEventListener('click', closeModal);
+                overlay.addEventListener('click', function (e) {
+                    if (e.target === overlay) closeModal();
+                });
+
+                form.addEventListener('submit', function (e) {
+                    e.preventDefault();
+                    var fd = new FormData(form);
+                    var body = new URLSearchParams(fd);
+
+                    fetch('/ingredient/add', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: body
+                    })
+                    .then(function (res) {
+                        if (!res.ok) return res.text().then(function (t) { throw new Error(t || res.status); });
+                        return res.json();
+                    })
+                    .then(function (data) {
+                        var noMsg = list.querySelector('.no-ingredients');
+                        if (noMsg) noMsg.remove();
+
+                        var li = document.createElement('li');
+                        li.innerHTML = '<label><input type="checkbox" name="ingredient_ids" value="' + data.ingredient_id + '"> ' + escapeHtml(data.name) + '</label>';
+                        list.appendChild(li);
+
+                        closeModal();
+                    })
+                    .catch(function (err) {
+                        alert('Could not add ingredient: ' + (err.message || 'Unknown error'));
+                    });
+                });
+
+                function escapeHtml(text) {
+                    var div = document.createElement('div');
+                    div.textContent = text;
+                    return div.innerHTML;
+                }
+            })();
+        </script>
     </body>
 </html>

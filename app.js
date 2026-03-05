@@ -115,6 +115,39 @@ app.delete('/recipe/delete/:id', async (req, res) => {
     }
 });
 
+app.post('/ingredient/add', async (req, res) => {
+    try {
+        const { name, fact_title, fact_content } = req.body;
+
+        // Basic validation
+        if (!name || name.trim().length === 0) {
+            return res.status(400).send('Ingredient name is required');
+        }
+
+        const sql = `
+            INSERT INTO ingredients (name, fact_title, fact_content)
+            VALUES (?, ?, ?)
+        `;
+
+        const [result] = await db.query(sql, [
+            name.trim(),
+            fact_title ? fact_title.trim() : null,
+            fact_content ? fact_content.trim() : null
+        ]);
+
+        // Optionally redirect or return success JSON
+        res.status(201).json({
+            ingredient_id: result.insertId,
+            name: name.trim(),
+            fact_title: fact_title ? fact_title.trim() : null,
+            fact_content: fact_content ? fact_content.trim() : null
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Error adding ingredient');
+    }
+});
+
 // start the server here
 const PORT = 3000;
 app.listen(PORT, () => {
