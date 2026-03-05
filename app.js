@@ -101,6 +101,16 @@ app.post('/recipe/add', async (req, res) => {
     }
 });
 
+app.get('/ingredients', async (req, res) => {
+    try {
+        const [rows] = await db.query('SELECT * FROM ingredients ORDER BY name');
+        res.render('ingredients', { ingredients: rows });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Database Error');
+    }
+});
+
 app.delete('/recipe/delete/:id', async (req, res) => {
     try {
         const recipeId = req.params.id;
@@ -145,6 +155,58 @@ app.post('/ingredient/add', async (req, res) => {
     } catch (err) {
         console.error(err);
         res.status(500).send('Error adding ingredient');
+    }
+});
+
+app.post('/ingredient/edit/:id', async (req, res) => {
+    try {
+        const ingredientId = req.params.id;
+        const { name, fact_title, fact_content } = req.body;
+
+        if (!name || name.trim().length === 0) {
+            return res.status(400).send('Ingredient name is required');
+        }
+
+        const sql = `
+            UPDATE ingredients
+            SET name = ?, fact_title = ?, fact_content = ?
+            WHERE ingredient_id = ?
+        `;
+
+        const [result] = await db.query(sql, [
+            name.trim(),
+            fact_title ? fact_title.trim() : null,
+            fact_content ? fact_content.trim() : null,
+            ingredientId
+        ]);
+
+        if (result.affectedRows === 0) {
+            return res.status(404).send('Ingredient not found');
+        }
+
+        res.json({
+            ingredient_id: ingredientId,
+            name: name.trim(),
+            fact_title: fact_title ? fact_title.trim() : null,
+            fact_content: fact_content ? fact_content.trim() : null
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Error updating ingredient');
+    }
+});
+
+app.delete('/ingredient/delete/:id', async (req, res) => {
+    try {
+        const ingredientId = req.params.id;
+        const [result] = await db.query('DELETE FROM ingredients WHERE ingredient_id = ?', [ingredientId]);
+        if (result.affectedRows === 0) {
+            return res.status(404).send('Ingredient not found');
+        }
+        res.status(200).send('Ingredient deleted successfully');
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Error deleting ingredient');
     }
 });
 
