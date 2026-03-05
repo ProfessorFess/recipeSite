@@ -4,6 +4,33 @@
     <meta charset="UTF-8">
     <title><%= recipe.title %> - Recipe</title>
     <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .ingredient-name-wrap { position: relative; display: inline; }
+        .ingredient-popup {
+            position: absolute;
+            left: 0;
+            bottom: 100%;
+            margin-bottom: 4px;
+            padding: 6px 10px;
+            max-width: 280px;
+            background: #333;
+            color: #fff;
+            font-size: 0.85rem;
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            white-space: normal;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.15s, visibility 0.15s;
+            z-index: 10;
+            pointer-events: none;
+        }
+        .ingredient-name-wrap:hover .ingredient-popup {
+            opacity: 1;
+            visibility: visible;
+        }
+        .ingredient-popup strong { display: block; margin-bottom: 2px; }
+    </style>
 </head>
 <body>
     <h1><%= recipe.title %></h1>
@@ -33,11 +60,17 @@
     <ul>
         <% ingredients.forEach(function(ing) { %>
             <li>
-                <%= ing.name %><% if (ing.quantity || ing.unit) { %> — <%= ing.quantity || '' %> <%= ing.unit || '' %><% } %>
                 <% if (ing.fact_title || ing.fact_content) { %>
-                    <span class="ingredient-fact" title="<%= (ing.fact_title ? ing.fact_title + ': ' : '') + (ing.fact_content || '') %>">ⓘ</span>
-                    <small class="ingredient-detail"><% if (ing.fact_title) { %><strong><%= ing.fact_title %>:</strong> <% } %><%= ing.fact_content || '' %></small>
-                <% } %>
+                    <span class="ingredient-name-wrap">
+                        <span class="ingredient-name"><%= ing.name %></span>
+                        <span class="ingredient-popup">
+                            <% if (ing.fact_title) { %><strong><%= ing.fact_title %></strong><% } %>
+                            <%= ing.fact_content || '' %>
+                        </span>
+                    </span>
+                <% } else { %>
+                    <%= ing.name %>
+                <% } %><% if (ing.quantity || ing.unit) { %> — <%= ing.quantity || '' %> <%= ing.unit || '' %><% } %>
             </li>
         <% }); %>
     </ul>
