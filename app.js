@@ -69,7 +69,12 @@ const MAIN_PROTEIN_OPTIONS = [
 app.get('/add-recipe', async (req, res) => {
     try {
         const [rows] = await db.query('SELECT * FROM ingredients');
-        res.render('add-recipe', { ingredients: rows, mainProteinOptions: MAIN_PROTEIN_OPTIONS });
+        res.render('add-recipe', {
+            ingredients: rows,
+            mainProteinOptions: MAIN_PROTEIN_OPTIONS,
+            errors: [],
+            formData: null
+        });
     } catch (err) {
         console.error(err);
         res.status(500).send('Database Error');
@@ -87,26 +92,67 @@ app.post('/recipe/add', async (req, res) => {
             prep_time_mins
         } = req.body;
 
+        const trimmedTitle = title ? title.trim() : '';
+        const trimmedDescription = description ? description.trim() : '';
+        const trimmedInstructions = instructions ? instructions.trim() : '';
+        const trimmedMainProtein = main_protein ? main_protein.trim() : '';
+
+        // Normalize ingredient_ids to array (repeated name or single value)
+        let ingredientIds = req.body.ingredient_ids;
+        if (ingredientIds == null) ingredientIds = [];
+        if (!Array.isArray(ingredientIds)) ingredientIds = [ingredientIds];
+        const ids = ingredientIds
+            .filter(id => id !== '' && id != null)
+            .map(id => parseInt(id, 10))
+            .filter(n => !isNaN(n));
+
+        const errors = [];
+        if (!trimmedTitle) {
+            errors.push('Title is required.');
+        }
+        if (!trimmedInstructions) {
+            errors.push('Instructions are required.');
+        }
+        if (!trimmedMainProtein) {
+            errors.push('Main protein is required.');
+        } else if (!MAIN_PROTEIN_OPTIONS.includes(trimmedMainProtein)) {
+            errors.push('Please choose a valid main protein option.');
+        }
+        if (ids.length === 0) {
+            errors.push('Please select at least one ingredient.');
+        }
+
+        if (errors.length) {
+            const [rows] = await db.query('SELECT * FROM ingredients');
+            return res.status(400).render('add-recipe', {
+                ingredients: rows,
+                mainProteinOptions: MAIN_PROTEIN_OPTIONS,
+                errors,
+                formData: {
+                    title: trimmedTitle,
+                    description: trimmedDescription,
+                    instructions: trimmedInstructions,
+                    main_protein: trimmedMainProtein,
+                    prep_time_mins,
+                    ingredient_ids: ids
+                }
+            });
+        }
+
         const sql = `
             INSERT INTO recipes (title, description, instructions, main_protein, prep_time_mins)
             VALUES (?, ?, ?, ?, ?)
         `;
 
         const [result] = await db.query(sql, [
-            title,
-            description,
-            instructions,
-            main_protein,
+            trimmedTitle,
+            trimmedDescription || null,
+            trimmedInstructions,
+            trimmedMainProtein,
             prep_time_mins || null
         ]);
 
         const newRecipeId = result.insertId;
-
-        // Normalize ingredient_ids to array (repeated name or single value)
-        let ingredientIds = req.body.ingredient_ids;
-        if (ingredientIds == null) ingredientIds = [];
-        if (!Array.isArray(ingredientIds)) ingredientIds = [ingredientIds];
-        const ids = ingredientIds.filter(id => id !== '' && id != null).map(id => parseInt(id, 10)).filter(n => !isNaN(n));
 
         for (let i = 0; i < ids.length; i++) {
             await db.query(

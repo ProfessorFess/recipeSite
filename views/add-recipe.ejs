@@ -35,27 +35,54 @@
     </head>
     <body>
         <h1>Add Recipe</h1>
-        <form action="/recipe/add" method="post">
+
+        <% if (errors && errors.length) { %>
+            <div class="error-messages" style="color: #b00020; margin-bottom: 1rem;">
+                <p><strong>Please fix the following:</strong></p>
+                <ul>
+                    <% errors.forEach(function(err) { %>
+                        <li><%= err %></li>
+                    <% }); %>
+                </ul>
+            </div>
+        <% } %>
+
+        <form action="/recipe/add" method="post" id="add-recipe-form">
             <label for="title">Title</label>
-            <input id="title" name="title" type="text" required>
+            <input
+                id="title"
+                name="title"
+                type="text"
+                required
+                value="<%= formData && formData.title ? formData.title : '' %>">
 
             <label for="description">Description</label>
-            <textarea id="description" name="description"></textarea>
+            <textarea id="description" name="description"><%= formData && formData.description ? formData.description : '' %></textarea>
 
             <label for="instructions">Instructions</label>
-            <textarea id="instructions" name="instructions"></textarea>
+            <textarea id="instructions" name="instructions" required><%= formData && formData.instructions ? formData.instructions : '' %></textarea>
 
             <label for="main_protein">Main Protein</label>
             <select id="main_protein" name="main_protein" required>
+                <option value="">-- Select main protein --</option>
                 <% if (typeof mainProteinOptions !== 'undefined' && mainProteinOptions && mainProteinOptions.length) { %>
                     <% mainProteinOptions.forEach(function(opt) { %>
-                        <option value="<%= opt %>"><%= opt %></option>
+                        <option
+                            value="<%= opt %>"
+                            <%= formData && formData.main_protein === opt ? 'selected' : '' %>>
+                            <%= opt %>
+                        </option>
                     <% }); %>
                 <% } %>
             </select>
 
             <label for="prep_time_mins">Prep Time (minutes)</label>
-            <input id="prep_time_mins" name="prep_time_mins" type="number" min="0">
+            <input
+                id="prep_time_mins"
+                name="prep_time_mins"
+                type="number"
+                min="0"
+                value="<%= formData && formData.prep_time_mins ? formData.prep_time_mins : '' %>">
 
             <fieldset>
                 <legend>Ingredients</legend>
@@ -69,7 +96,11 @@
                     <% ingredients.forEach(function(ing) { %>
                         <li>
                             <label>
-                                <input type="checkbox" name="ingredient_ids" value="<%= ing.ingredient_id %>">
+                                <input
+                                    type="checkbox"
+                                    name="ingredient_ids"
+                                    value="<%= ing.ingredient_id %>"
+                                    <%= (formData && Array.isArray(formData.ingredient_ids) && formData.ingredient_ids.indexOf(ing.ingredient_id) !== -1) ? 'checked' : '' %>>
                                 <%= ing.name %>
                             </label>
                         </li>
@@ -107,6 +138,7 @@
 
         <script>
             (function () {
+                var recipeForm = document.getElementById('add-recipe-form');
                 var overlay = document.getElementById('ingredient-modal');
                 var openBtn = document.getElementById('open-ingredient-modal');
                 var closeBtn = document.getElementById('close-ingredient-modal');
@@ -180,6 +212,33 @@
                     var div = document.createElement('div');
                     div.textContent = text;
                     return div.innerHTML;
+                }
+                if (recipeForm) {
+                    recipeForm.addEventListener('submit', function (e) {
+                        var messages = [];
+                        var titleInput = document.getElementById('title');
+                        var mainProteinSelect = document.getElementById('main_protein');
+                        var instructionsInput = document.getElementById('instructions');
+                        var ingredientCheckboxes = document.querySelectorAll('#ingredient-list input[type="checkbox"]:checked');
+
+                        if (!titleInput.value.trim()) {
+                            messages.push('Title is required.');
+                        }
+                        if (!mainProteinSelect.value) {
+                            messages.push('Main protein is required.');
+                        }
+                        if (!instructionsInput.value.trim()) {
+                            messages.push('Instructions are required.');
+                        }
+                        if (ingredientCheckboxes.length === 0) {
+                            messages.push('Please select at least one ingredient.');
+                        }
+
+                        if (messages.length) {
+                            e.preventDefault();
+                            alert(messages.join('\n'));
+                        }
+                    });
                 }
             })();
         </script>
