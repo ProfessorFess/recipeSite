@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title><%= recipe.title %> - Recipe</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <h1><%= recipe.title %></h1>
+    <table border="1">
+        <tr>
+            <th>Main Protein</th>
+            <td><%= recipe.main_protein %></td>
+        </tr>
+        <tr>
+            <th>Description</th>
+            <td><%= recipe.description %></td>
+        </tr>
+        <tr>
+            <th>Prep Time</th>
+            <td>
+                <% if (recipe.prep_time_mins) { %>
+                    <%= recipe.prep_time_mins %> minutes
+                <% } else { %>
+                    N/A
+                <% } %>
+            </td>
+        </tr>
+        <!-- Add more fields as needed -->
+    </table>
+
+    <br>
+    <a href="/recipes">Back to All Recipes</a>
+    <br>
+    <a href="/">Back to Home</a>
+</body>
+</html>
