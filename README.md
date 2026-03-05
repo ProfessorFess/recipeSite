@@ -1,3 +1,9 @@
+# Fess's Recipe Site
+
+Welcome to **Fess's Recipe Site** – a simple, easy-to-use web application for organizing your favorite recipes and ingredients! Whether you're a passionate home cook or simply looking to keep your meal ideas organized, this app provides a friendly interface to add, view, and manage recipes and their ingredients. Designed by Fess Myhre, this site aims to make home cooking more enjoyable and approachable for everyone.
+
+Explore recipes by main protein, add your own culinary creations, and easily manage a list of ingredients. Get started by following the setup instructions below to run the site on your own machine. Happy cooking!
+
 ## Website Setup Instructions
 
 ### Prerequisites
@@ -6,8 +12,8 @@
 
 ### 1. Clone the Repository
 ```bash
-git clone <your-repo-url>
-cd <your-project-folder>
+git clone git@github.com:ProfessorFess/recipeSite.git
+cd recipeSite.git
 ```
 
 ### 2. Install Dependencies
