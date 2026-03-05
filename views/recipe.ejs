@@ -2,83 +2,93 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><%= recipe.title %> - Recipe</title>
     <link rel="stylesheet" href="/css/style.css">
-    <style>
-        .ingredient-name-wrap { position: relative; display: inline; }
-        .ingredient-popup {
-            position: absolute;
-            left: 0;
-            bottom: 100%;
-            margin-bottom: 4px;
-            padding: 6px 10px;
-            max-width: 280px;
-            background: #333;
-            color: #fff;
-            font-size: 0.85rem;
-            border-radius: 6px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-            white-space: normal;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.15s, visibility 0.15s;
-            z-index: 10;
-            pointer-events: none;
-        }
-        .ingredient-name-wrap:hover .ingredient-popup {
-            opacity: 1;
-            visibility: visible;
-        }
-        .ingredient-popup strong { display: block; margin-bottom: 2px; }
-    </style>
 </head>
 <body>
-    <h1><%= recipe.title %></h1>
-    <table border="1">
-        <tr>
-            <th>Main Protein</th>
-            <td><%= recipe.main_protein %></td>
-        </tr>
-        <tr>
-            <th>Description</th>
-            <td><%= recipe.description %></td>
-        </tr>
-        <tr>
-            <th>Prep Time</th>
-            <td>
-                <% if (recipe.prep_time_mins) { %>
-                    <%= recipe.prep_time_mins %> minutes
-                <% } else { %>
-                    N/A
-                <% } %>
-            </td>
-        </tr>
-    </table>
+    <nav class="top-nav">
+        <div class="top-nav-inner">
+            <a href="/" class="nav-brand">Recipe Site</a>
+            <a href="/recipes">Recipes</a>
+            <a href="/add-recipe">Add Recipe</a>
+            <a href="/ingredients">Ingredients</a>
+        </div>
+    </nav>
 
-    <% if (typeof ingredients !== 'undefined' && ingredients && ingredients.length > 0) { %>
-    <h2>Ingredients</h2>
-    <ul>
-        <% ingredients.forEach(function(ing) { %>
-            <li>
-                <% if (ing.fact_title || ing.fact_content) { %>
-                    <span class="ingredient-name-wrap">
-                        <span class="ingredient-name"><%= ing.name %></span>
-                        <span class="ingredient-popup">
-                            <% if (ing.fact_title) { %><strong><%= ing.fact_title %></strong><% } %>
-                            <%= ing.fact_content || '' %>
-                        </span>
-                    </span>
-                <% } else { %>
-                    <%= ing.name %>
-                <% } %><% if (ing.quantity || ing.unit) { %> — <%= ing.quantity || '' %> <%= ing.unit || '' %><% } %>
-            </li>
-        <% }); %>
-    </ul>
-    <% } %>
+    <div class="page">
+        <div class="page-inner">
+            <div class="card">
+                <div class="card-header">
+                    <h1><%= recipe.title %></h1>
+                </div>
+                <div class="table-wrap">
+                    <table class="table">
+                        <tr>
+                            <th>Main Protein</th>
+                            <td><%= recipe.main_protein %></td>
+                        </tr>
+                        <tr>
+                            <th>Description</th>
+                            <td><%= recipe.description %></td>
+                        </tr>
+                        <tr>
+                            <th>Prep Time</th>
+                            <td>
+                                <% if (recipe.prep_time_mins) { %>
+                                    <%= recipe.prep_time_mins %> minutes
+                                <% } else { %>
+                                    N/A
+                                <% } %>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
 
-    <br>
-    <a href="/recipes">Back to All Recipes</a>
-    <br>
-    <a href="/">Back to Home</a>
+            <% if (typeof ingredients !== 'undefined' && ingredients && ingredients.length > 0) { %>
+            <div class="card">
+                <div class="card-header">
+                    <h2>Ingredients</h2>
+                </div>
+                <ul>
+                    <% ingredients.forEach(function(ing) { %>
+                        <li>
+                            <% if (ing.fact_title || ing.fact_content) { %>
+                                <span class="ingredient-name-wrap">
+                                    <span class="ingredient-name"><%= ing.name %></span>
+                                    <span class="ingredient-popup">
+                                        <% if (ing.fact_title) { %><strong><%= ing.fact_title %></strong><% } %>
+                                        <%= ing.fact_content || '' %>
+                                    </span>
+                                </span>
+                            <% } else { %>
+                                <%= ing.name %>
+                            <% } %><% if (ing.quantity || ing.unit) { %> — <%= ing.quantity || '' %> <%= ing.unit || '' %><% } %>
+                        </li>
+                    <% }); %>
+                </ul>
+            </div>
+            <% } %>
+
+            <% if (recipe.instructions) { %>
+            <div class="card">
+                <div class="card-header">
+                    <h2>Instructions</h2>
+                </div>
+                <p style="white-space: pre-wrap; color: var(--color-text);"><%= recipe.instructions %></p>
+            </div>
+            <% } %>
+
+            <div class="actions-bar">
+                <a href="/recipes" class="btn btn-ghost">Back to All Recipes</a>
+                <a href="/" class="btn btn-ghost">Back to Home</a>
+            </div>
+        </div>
+
+        <footer class="site-footer">
+            Fess's Recipe Site &copy; 2026
+        </footer>
+    </div>
 </body>
 </html>

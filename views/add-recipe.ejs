@@ -2,118 +2,114 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Add Recipe</title>
         <link rel="stylesheet" href="/css/style.css">
-        <style>
-            .modal-overlay {
-                display: none;
-                position: fixed;
-                inset: 0;
-                background: rgba(0,0,0,0.5);
-                align-items: center;
-                justify-content: center;
-                z-index: 100;
-            }
-            .modal-overlay.is-open { display: flex; }
-            .modal-box {
-                background: #fff;
-                padding: 1.5rem;
-                border-radius: 8px;
-                box-shadow: 0 8px 24px rgba(0,0,0,0.2);
-                min-width: 320px;
-            }
-            .modal-box h2 { margin-top: 0; }
-            .modal-box label { display: block; margin-top: 0.75rem; }
-            .modal-box input, .modal-box textarea { width: 100%; margin-top: 0.25rem; box-sizing: border-box; }
-            .modal-actions { margin-top: 1.25rem; display: flex; gap: 0.5rem; justify-content: flex-end; }
-            .modal-actions button[type="button"] { background: #888; color: #fff; border: none; padding: 0.4rem 0.8rem; border-radius: 4px; cursor: pointer; }
-            .modal-actions button[type="submit"] { cursor: pointer; }
-            .ingredient-list { list-style: none; padding-left: 0; margin: 0.5rem 0 0 0; }
-            .ingredient-list label { display: inline; margin-top: 0; }
-            .ingredient-list li { margin-bottom: 0.35rem; }
-        </style>
     </head>
     <body>
-        <h1>Add Recipe</h1>
-
-        <% if (errors && errors.length) { %>
-            <div class="error-messages" style="color: #b00020; margin-bottom: 1rem;">
-                <p><strong>Please fix the following:</strong></p>
-                <ul>
-                    <% errors.forEach(function(err) { %>
-                        <li><%= err %></li>
-                    <% }); %>
-                </ul>
+        <nav class="top-nav">
+            <div class="top-nav-inner">
+                <a href="/" class="nav-brand">Recipe Site</a>
+                <a href="/recipes">Recipes</a>
+                <a href="/add-recipe">Add Recipe</a>
+                <a href="/ingredients">Ingredients</a>
             </div>
-        <% } %>
+        </nav>
 
-        <form action="/recipe/add" method="post" id="add-recipe-form">
-            <label for="title">Title</label>
-            <input
-                id="title"
-                name="title"
-                type="text"
-                required
-                value="<%= formData && formData.title ? formData.title : '' %>">
+        <div class="page">
+            <div class="page-inner">
+                <div class="card">
+                    <div class="card-header">
+                        <h1>Add Recipe</h1>
+                    </div>
 
-            <label for="description">Description</label>
-            <textarea id="description" name="description"><%= formData && formData.description ? formData.description : '' %></textarea>
+                    <% if (errors && errors.length) { %>
+                        <div class="alert alert-error">
+                            <strong>Please fix the following:</strong>
+                            <ul>
+                                <% errors.forEach(function(err) { %>
+                                    <li><%= err %></li>
+                                <% }); %>
+                            </ul>
+                        </div>
+                    <% } %>
 
-            <label for="instructions">Instructions</label>
-            <textarea id="instructions" name="instructions" required><%= formData && formData.instructions ? formData.instructions : '' %></textarea>
+                    <form action="/recipe/add" method="post" id="add-recipe-form">
+                        <label for="title">Title</label>
+                        <input
+                            id="title"
+                            name="title"
+                            type="text"
+                            required
+                            value="<%= formData && formData.title ? formData.title : '' %>">
 
-            <label for="main_protein">Main Protein</label>
-            <select id="main_protein" name="main_protein" required>
-                <option value="">-- Select main protein --</option>
-                <% if (typeof mainProteinOptions !== 'undefined' && mainProteinOptions && mainProteinOptions.length) { %>
-                    <% mainProteinOptions.forEach(function(opt) { %>
-                        <option
-                            value="<%= opt %>"
-                            <%= formData && formData.main_protein === opt ? 'selected' : '' %>>
-                            <%= opt %>
-                        </option>
-                    <% }); %>
-                <% } %>
-            </select>
+                        <label for="description">Description</label>
+                        <textarea id="description" name="description"><%= formData && formData.description ? formData.description : '' %></textarea>
 
-            <label for="prep_time_mins">Prep Time (minutes)</label>
-            <input
-                id="prep_time_mins"
-                name="prep_time_mins"
-                type="number"
-                min="0"
-                value="<%= formData && formData.prep_time_mins ? formData.prep_time_mins : '' %>">
+                        <label for="instructions">Instructions</label>
+                        <textarea id="instructions" name="instructions" required><%= formData && formData.instructions ? formData.instructions : '' %></textarea>
 
-            <fieldset>
-                <legend>Ingredients</legend>
-                <div class="search-row">
-                    <label for="ingredient-search">Search ingredients:</label>
-                    <input id="ingredient-search" type="text" placeholder="Type to filter by name">
+                        <label for="main_protein">Main Protein</label>
+                        <select id="main_protein" name="main_protein" required>
+                            <option value="">-- Select main protein --</option>
+                            <% if (typeof mainProteinOptions !== 'undefined' && mainProteinOptions && mainProteinOptions.length) { %>
+                                <% mainProteinOptions.forEach(function(opt) { %>
+                                    <option
+                                        value="<%= opt %>"
+                                        <%= formData && formData.main_protein === opt ? 'selected' : '' %>>
+                                        <%= opt %>
+                                    </option>
+                                <% }); %>
+                            <% } %>
+                        </select>
+
+                        <label for="prep_time_mins">Prep Time (minutes)</label>
+                        <input
+                            id="prep_time_mins"
+                            name="prep_time_mins"
+                            type="number"
+                            min="0"
+                            value="<%= formData && formData.prep_time_mins ? formData.prep_time_mins : '' %>">
+
+                        <fieldset>
+                            <legend>Ingredients</legend>
+                            <div class="search-row">
+                                <label for="ingredient-search">Search ingredients:</label>
+                                <input id="ingredient-search" type="text" placeholder="Type to filter by name">
+                            </div>
+                            <button type="button" id="open-ingredient-modal" class="btn btn-ghost btn-sm">Add new ingredient</button>
+                            <ul class="ingredient-list" id="ingredient-list">
+                            <% if (typeof ingredients !== 'undefined' && ingredients && ingredients.length) { %>
+                                <% ingredients.forEach(function(ing) { %>
+                                    <li>
+                                        <label>
+                                            <input
+                                                type="checkbox"
+                                                name="ingredient_ids"
+                                                value="<%= ing.ingredient_id %>"
+                                                <%= (formData && Array.isArray(formData.ingredient_ids) && formData.ingredient_ids.indexOf(ing.ingredient_id) !== -1) ? 'checked' : '' %>>
+                                            <%= ing.name %>
+                                        </label>
+                                    </li>
+                                <% }); %>
+                            <% } else { %>
+                                <li class="no-ingredients">No ingredients in the database.</li>
+                            <% } %>
+                            </ul>
+                        </fieldset>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">Save Recipe</button>
+                            <a href="/" class="btn btn-ghost">Back to Home</a>
+                        </div>
+                    </form>
                 </div>
-                <button type="button" id="open-ingredient-modal">Add new ingredient</button>
-                <ul class="ingredient-list" id="ingredient-list">
-                <% if (typeof ingredients !== 'undefined' && ingredients && ingredients.length) { %>
-                    <% ingredients.forEach(function(ing) { %>
-                        <li>
-                            <label>
-                                <input
-                                    type="checkbox"
-                                    name="ingredient_ids"
-                                    value="<%= ing.ingredient_id %>"
-                                    <%= (formData && Array.isArray(formData.ingredient_ids) && formData.ingredient_ids.indexOf(ing.ingredient_id) !== -1) ? 'checked' : '' %>>
-                                <%= ing.name %>
-                            </label>
-                        </li>
-                    <% }); %>
-                <% } else { %>
-                    <li class="no-ingredients">No ingredients in the database.</li>
-                <% } %>
-                </ul>
-            </fieldset>
+            </div>
 
-            <button type="submit">Save Recipe</button>
-        </form>
-        <a href="/">Back to Home</a>
+            <footer class="site-footer">
+                Fess's Recipe Site &copy; 2026
+            </footer>
+        </div>
 
         <div class="modal-overlay" id="ingredient-modal" aria-hidden="true">
             <div class="modal-box" onclick="event.stopPropagation()">
@@ -129,8 +125,8 @@
                     <textarea id="ing-fact-content" name="fact_content" rows="3"></textarea>
 
                     <div class="modal-actions">
-                        <button type="button" id="close-ingredient-modal">Cancel</button>
-                        <button type="submit">Add ingredient</button>
+                        <button type="button" id="close-ingredient-modal" class="btn btn-cancel btn-sm">Cancel</button>
+                        <button type="submit" class="btn btn-primary btn-sm">Add ingredient</button>
                     </div>
                 </form>
             </div>
@@ -167,7 +163,6 @@
                         var query = (this.value || '').toLowerCase();
                         var items = list.querySelectorAll('li');
                         items.forEach(function (li) {
-                            // skip the "no ingredients" message from filtering logic
                             if (li.classList.contains('no-ingredients')) {
                                 li.style.display = query ? 'none' : '';
                                 return;

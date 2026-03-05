@@ -2,13 +2,38 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fess's Recipe Site</title>
+    <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-    <h1>Welcome to this Recipe Site!</h1>
-    <p>My name is Fess Myhre and I designed this web application. I enjoy food thoroughly, and I cook when I can! I am no professional, but I hope this website can aid you in organizing your recipes and ingredients!</p>
-    <a href="/recipes">View My Recipes</a>
-    <a href="/add-recipe">Add a Recipe</a>
-    <a href="/ingredients">View Ingredients</a>
+    <nav class="top-nav">
+        <div class="top-nav-inner">
+            <a href="/" class="nav-brand">Recipe Site</a>
+            <a href="/recipes">Recipes</a>
+            <a href="/add-recipe">Add Recipe</a>
+            <a href="/ingredients">Ingredients</a>
+        </div>
+    </nav>
+
+    <div class="page">
+        <div class="page-inner">
+            <div class="card">
+                <div class="hero">
+                    <h1>Welcome to this Recipe Site!</h1>
+                    <p>My name is Fess Myhre and I designed this web application. I enjoy food thoroughly, and I cook when I can! I am no professional, but I hope this website can aid you in organizing your recipes and ingredients!</p>
+                    <div class="button-row">
+                        <a href="/recipes" class="btn btn-primary">View My Recipes</a>
+                        <a href="/add-recipe" class="btn btn-secondary">Add a Recipe</a>
+                        <a href="/ingredients" class="btn btn-ghost">View Ingredients</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="site-footer">
+            Fess's Recipe Site &copy; 2026
+        </footer>
+    </div>
 </body>
 </html>

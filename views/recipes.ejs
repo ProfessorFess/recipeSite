@@ -2,55 +2,81 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>All Recipes</title>
-    <link rel="stylesheet" href="/css/style.css"> </head>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
 <body>
-    <h1>Our Recipe Collection</h1>
+    <nav class="top-nav">
+        <div class="top-nav-inner">
+            <a href="/" class="nav-brand">Recipe Site</a>
+            <a href="/recipes">Recipes</a>
+            <a href="/add-recipe">Add Recipe</a>
+            <a href="/ingredients">Ingredients</a>
+        </div>
+    </nav>
 
-    <% const proteinKeys = Object.keys(recipesByProtein || {}); %>
+    <div class="page">
+        <div class="page-inner">
+            <h1>Our Recipe Collection</h1>
 
-    <% if (proteinKeys.length > 0) { %>
-        <% proteinKeys.forEach(function(protein) { %>
-            <h2><%= protein %></h2>
-            <table border="1">
-                <thead>
-                    <tr>
-                        <th>Recipe Name</th>
-                        <th>Protein</th>
-                        <th>Details</th>
-                        <th>Delete</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <% recipesByProtein[protein].forEach(function(recipe) { %>
-                        <tr>
-                            <td><%= recipe.title %></td>
-                            <td><%= recipe.main_protein %></td>
-                            <td><a href="/recipe/<%= recipe.recipe_id %>">View Details</a></td>
-                            <td>
-                                <button 
-                                    type="button" 
-                                    class="delete-recipe-btn" 
-                                    data-recipe-id="<%= recipe.recipe_id %>">
-                                    Delete
-                                </button>
-                            </td>
-                        </tr>
-                    <% }); %>
-                </tbody>
-            </table>
-            <br>
-        <% }); %>
-    <% } else { %>
-        <p>No recipes found in the database. Did you run the SQL script?</p>
-    <% } %>
+            <% const proteinKeys = Object.keys(recipesByProtein || {}); %>
 
-    <br>
-    <a href="/">Back to Home</a>
-    <a href="/add-recipe">Add a Recipe</a>
+            <% if (proteinKeys.length > 0) { %>
+                <% proteinKeys.forEach(function(protein) { %>
+                    <div class="protein-section">
+                        <h2><%= protein %></h2>
+                        <div class="card">
+                            <div class="table-wrap">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Recipe Name</th>
+                                            <th>Protein</th>
+                                            <th>Details</th>
+                                            <th>Delete</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <% recipesByProtein[protein].forEach(function(recipe) { %>
+                                            <tr>
+                                                <td><%= recipe.title %></td>
+                                                <td><%= recipe.main_protein %></td>
+                                                <td><a href="/recipe/<%= recipe.recipe_id %>" class="btn btn-primary btn-sm">View Details</a></td>
+                                                <td>
+                                                    <button
+                                                        type="button"
+                                                        class="delete-recipe-btn btn btn-danger btn-sm"
+                                                        data-recipe-id="<%= recipe.recipe_id %>">
+                                                        Delete
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        <% }); %>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                <% }); %>
+            <% } else { %>
+                <div class="card">
+                    <p>No recipes found in the database. Did you run the SQL script?</p>
+                </div>
+            <% } %>
+
+            <div class="actions-bar">
+                <a href="/" class="btn btn-ghost">Back to Home</a>
+                <a href="/add-recipe" class="btn btn-secondary">Add a Recipe</a>
+            </div>
+        </div>
+
+        <footer class="site-footer">
+            Fess's Recipe Site &copy; 2026
+        </footer>
+    </div>
 
     <script>
-        // Attach delete handlers to each delete button
         document.addEventListener('DOMContentLoaded', function () {
             const deleteButtons = document.querySelectorAll('.delete-recipe-btn');
 
@@ -68,7 +94,6 @@
                         });
 
                         if (response.ok) {
-                            // Reload the page to reflect the deleted recipe
                             window.location.reload();
                         } else {
                             const message = await response.text();
