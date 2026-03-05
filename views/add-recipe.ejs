@@ -29,8 +29,19 @@
             <label for="prep_time_mins">Prep Time (minutes)</label>
             <input id="prep_time_mins" name="prep_time_mins" type="number" min="0">
 
-            <label for="featured_ingredient_id">Featured Ingredient ID</label>
-            <input id="featured_ingredient_id" name="featured_ingredient_id" type="number" min="1">
+            <fieldset>
+                <legend>Ingredients</legend>
+                <% if (typeof ingredients !== 'undefined' && ingredients && ingredients.length) { %>
+                    <% ingredients.forEach(function(ing) { %>
+                        <label>
+                            <input type="checkbox" name="ingredient_ids" value="<%= ing.ingredient_id %>">
+                            <%= ing.name %>
+                        </label><br>
+                    <% }); %>
+                <% } else { %>
+                    <p>No ingredients in the database.</p>
+                <% } %>
+            </fieldset>
 
             <button type="submit">Save Recipe</button>
         </form>

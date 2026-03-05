@@ -1,18 +1,11 @@
--- ==========================================================
--- SQL script for recipe database
--- Author: Fess Myhre
--- ==========================================================
-
--- 1. Setup database
+-- 1. Database
 -- ----------------------------------------------------------
 DROP DATABASE IF EXISTS recipe_db;
 CREATE DATABASE recipe_db;
 USE recipe_db;
 
--- 2. Create Ingredients Table
+-- 2. Ingredients (master list and facts for hover pop-ups)
 -- ----------------------------------------------------------
--- This table stores the master list of ingredients and 
--- the facts that will show up in the hover pop-ups.
 CREATE TABLE ingredients (
     ingredient_id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
@@ -20,42 +13,50 @@ CREATE TABLE ingredients (
     fact_content TEXT
 );
 
--- 3. Create Recipes Table
+-- 3. Recipes
 -- ----------------------------------------------------------
--- This table stores the core recipe details.
--- The 'main_protein' column allows you to filter by protein type.
 CREATE TABLE recipes (
     recipe_id INT AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
     description TEXT,
     instructions TEXT,
     main_protein ENUM('Chicken', 'Beef', 'Tofu', 'Grains', 'Fish') NOT NULL,
-    prep_time_mins INT,
-    -- This stores which ingredient is featured in this recipe
-    featured_ingredient_id INT,
-    FOREIGN KEY (featured_ingredient_id) REFERENCES ingredients(ingredient_id)
-    ON DELETE SET NULL
+    prep_time_mins INT
 );
 
--- 4. Seed data (initial population)
+-- 4. Recipe–ingredients junction (many ingredients per recipe)
 -- ----------------------------------------------------------
+CREATE TABLE recipe_ingredients (
+    recipe_id INT NOT NULL,
+    ingredient_id INT NOT NULL,
+    quantity VARCHAR(50) NULL,
+    unit VARCHAR(30) NULL,
+    sort_order INT NULL DEFAULT 0,
+    PRIMARY KEY (recipe_id, ingredient_id),
+    FOREIGN KEY (recipe_id) REFERENCES recipes(recipe_id) ON DELETE CASCADE,
+    FOREIGN KEY (ingredient_id) REFERENCES ingredients(ingredient_id) ON DELETE CASCADE
+);
 
--- Populate ingredients table
+-- 5. Seed: ingredients
+-- ----------------------------------------------------------
 INSERT INTO ingredients (name, fact_title, fact_content) VALUES
 ('Cumin', 'Origin', 'Cumin is native from the east Mediterranean to East India and has been used for over 5,000 years.'),
 ('Chicken Breast', 'Safety Tip', 'Always ensure poultry reaches an internal temperature of 165°F (74°C) to prevent foodborne illness.'),
 ('Firm Tofu', 'Quick Fact', 'Tofu is a great source of complete protein, containing all nine essential amino acids.'),
 ('Quinoa', 'Origin', 'Quinoa was considered the "mother of all grains" by the Inca Empire in the Andes Mountains.');
 
--- Populate recipes table
-INSERT INTO recipes (title, description, instructions, main_protein, prep_time_mins, featured_ingredient_id) VALUES
-('Spiced Cumin Chicken', 'A smoky and savory grilled chicken dish.', '1. Rub chicken with cumin. 2. Grill for 6 mins per side. 3. Serve with lime.', 'Chicken', 25, 2),
-('Crispy Tofu Stir-fry', 'A quick vegetarian meal with a crunch.', '1. Press tofu. 2. Fry until golden. 3. Toss with soy sauce and veggies.', 'Tofu', 30, 3),
-('Zesty Quinoa Salad', 'A refreshing grain-based bowl.', '1. Boil quinoa. 2. Mix with cucumbers, lemon, and cumin. 3. Chill before serving.', 'Grains', 15, 4);
-
--- 5. Verification Query
+-- 6. Seed: recipes
 -- ----------------------------------------------------------
--- Run this to make sure the join works
-SELECT r.title, r.main_protein, i.name AS highlighted_ingredient, i.fact_content
-FROM recipes r
-LEFT JOIN ingredients i ON r.featured_ingredient_id = i.ingredient_id;
+INSERT INTO recipes (title, description, instructions, main_protein, prep_time_mins) VALUES
+('Spiced Cumin Chicken', 'A smoky and savory grilled chicken dish.', '1. Rub chicken with cumin. 2. Grill for 6 mins per side. 3. Serve with lime.', 'Chicken', 25),
+('Crispy Tofu Stir-fry', 'A quick vegetarian meal with a crunch.', '1. Press tofu. 2. Fry until golden. 3. Toss with soy sauce and veggies.', 'Tofu', 30),
+('Zesty Quinoa Salad', 'A refreshing grain-based bowl.', '1. Boil quinoa. 2. Mix with cucumbers, lemon, and cumin. 3. Chill before serving.', 'Grains', 15);
+
+-- 7. Seed: recipe_ingredients
+-- ----------------------------------------------------------
+INSERT INTO recipe_ingredients (recipe_id, ingredient_id, quantity, unit, sort_order) VALUES
+(1, 2, NULL, NULL, 0),
+(1, 1, NULL, NULL, 1),
+(2, 3, NULL, NULL, 0),
+(3, 4, NULL, NULL, 0),
+(3, 1, NULL, NULL, 1);

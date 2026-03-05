@@ -26,8 +26,22 @@
                 <% } %>
             </td>
         </tr>
-        <!-- Add more fields as needed -->
     </table>
+
+    <% if (typeof ingredients !== 'undefined' && ingredients && ingredients.length > 0) { %>
+    <h2>Ingredients</h2>
+    <ul>
+        <% ingredients.forEach(function(ing) { %>
+            <li>
+                <%= ing.name %><% if (ing.quantity || ing.unit) { %> — <%= ing.quantity || '' %> <%= ing.unit || '' %><% } %>
+                <% if (ing.fact_title || ing.fact_content) { %>
+                    <span class="ingredient-fact" title="<%= (ing.fact_title ? ing.fact_title + ': ' : '') + (ing.fact_content || '') %>">ⓘ</span>
+                    <small class="ingredient-detail"><% if (ing.fact_title) { %><strong><%= ing.fact_title %>:</strong> <% } %><%= ing.fact_content || '' %></small>
+                <% } %>
+            </li>
+        <% }); %>
+    </ul>
+    <% } %>
 
     <br>
     <a href="/recipes">Back to All Recipes</a>
